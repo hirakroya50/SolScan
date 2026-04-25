@@ -91,11 +91,10 @@ export default function App() {
           style={styles.input}
           placeholder="Enter Solana wallet address"
           placeholderTextColor="#8a94a6"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Optional label"
-          placeholderTextColor="#8a94a6"
+          value={address}
+          onChangeText={setAddress}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
 
         {balance !== null && (
@@ -131,7 +130,7 @@ export default function App() {
                 return (
                   <View>
                     <Text>
-                      {scrollTo(item.mint, 6)}: {item.amount}
+                      {item.mint.slice(0, 6)}…{item.mint.slice(-4)}: {item.amount}
                     </Text>
                   </View>
                 );
