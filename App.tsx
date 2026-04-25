@@ -130,7 +130,8 @@ export default function App() {
                 return (
                   <View>
                     <Text>
-                      {item.mint.slice(0, 6)}…{item.mint.slice(-4)}: {item.amount}
+                      {item.mint.slice(0, 6)}…{item.mint.slice(-4)}:{" "}
+                      {item.amount}
                     </Text>
                   </View>
                 );
