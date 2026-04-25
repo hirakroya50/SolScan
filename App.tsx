@@ -61,12 +61,85 @@ export default function App() {
   const [tokens, setTokens] = useState<any[]>([]);
   const [txns, setTxns] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const search = async () => {
+    const addr = address.trim();
+    setLoading(true);
+    try {
+      const [bal, tok, tx] = await Promise.all([
+        getBalance(addr),
+        getTokens(addr),
+        getTxns(addr),
+      ]);
+      setBalance(bal);
+      setTokens(tok);
+      setTxns(tx);
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <View style={styles.container}>
-      <StatusBar style="auto" />
-      <Text>d</Text>
-      <TextInput />
-      <TextInput />
+      <ScrollView style={{}}>
+        <StatusBar style="dark" />
+        <Text style={styles.heading}>SolScan</Text>
+        <Text style={styles.subHeading}>
+          Track wallet balance, tokens and recent activityss
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Solana wallet address"
+          placeholderTextColor="#8a94a6"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Optional label"
+          placeholderTextColor="#8a94a6"
+        />
+
+        {balance !== null && (
+          <View style={{ marginTop: 16 }}>
+            <Text style={{ fontSize: 18, fontWeight: "600", color: "#0f172a" }}>
+              Balance: {balance.toFixed(4)} SOL
+            </Text>
+          </View>
+        )}
+        <TouchableOpacity
+          onPress={search}
+          style={{
+            marginTop: 16,
+            backgroundColor: "#2563eb",
+            paddingVertical: 14,
+            borderRadius: 14,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "#ffffff", fontWeight: "600" }}>
+            Fetch Data
+          </Text>
+        </TouchableOpacity>
+
+        {tokens.length > 0 && (
+          <>
+            <Text>Tokens</Text>
+            <FlatList
+              data={tokens}
+              keyExtractor={(item) => item.mint}
+              scrollEnabled={false}
+              renderItem={({ item }) => {
+                return (
+                  <View>
+                    <Text>
+                      {scrollTo(item.mint, 6)}: {item.amount}
+                    </Text>
+                  </View>
+                );
+              }}
+            />
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -74,8 +147,39 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#f3f6fb",
+    paddingTop: 64,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+    gap: 12,
+  },
+  heading: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#0f172a",
+    letterSpacing: 0.3,
+  },
+  subHeading: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#475569",
+    marginBottom: 8,
+  },
+  input: {
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: "#0f172a",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    shadowColor: "#0f172a",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
   },
 });
