@@ -86,7 +86,9 @@ export default function App() {
       setTxns(tx);
       setSearched(true);
     } catch (e: any) {
-      setError(e.message || "Something went wrong. Check the address and try again.");
+      setError(
+        e.message || "Something went wrong. Check the address and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -95,11 +97,15 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+      >
         {/* Header */}
         <Text style={styles.heading}>SolScan</Text>
-        <Text style={styles.subHeading}>Track wallet balance, tokens & recent activity</Text>
+        <Text style={styles.subHeading}>
+          Track wallet balance, tokens & recent activity
+        </Text>
 
         {/* Search */}
         <TextInput
@@ -107,7 +113,10 @@ export default function App() {
           placeholder="Enter Solana wallet address"
           placeholderTextColor="#8a94a6"
           value={address}
-          onChangeText={(t) => { setAddress(t); setError(null); }}
+          onChangeText={(t) => {
+            setAddress(t);
+            setError(null);
+          }}
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -115,7 +124,7 @@ export default function App() {
         {/* Error banner */}
         {error && (
           <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>⚠️  {error}</Text>
+            <Text style={styles.errorText}>⚠️ {error}</Text>
           </View>
         )}
 
@@ -126,9 +135,11 @@ export default function App() {
           disabled={loading}
           activeOpacity={0.8}
         >
-          {loading
-            ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.btnText}>Fetch Data</Text>}
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.btnText}>Fetch Data</Text>
+          )}
         </TouchableOpacity>
 
         {/* Results — only after a successful search */}
@@ -146,7 +157,9 @@ export default function App() {
               <View style={styles.emptyBox}>
                 <Text style={styles.emptyIcon}>🪙</Text>
                 <Text style={styles.emptyTitle}>No tokens found</Text>
-                <Text style={styles.emptyDesc}>This wallet holds no SPL tokens with a balance.</Text>
+                <Text style={styles.emptyDesc}>
+                  This wallet holds no SPL tokens with a balance.
+                </Text>
               </View>
             ) : (
               tokens.map((item) => (
@@ -166,7 +179,9 @@ export default function App() {
               <View style={styles.emptyBox}>
                 <Text style={styles.emptyIcon}>📭</Text>
                 <Text style={styles.emptyTitle}>No transactions found</Text>
-                <Text style={styles.emptyDesc}>This wallet has no recent transaction history.</Text>
+                <Text style={styles.emptyDesc}>
+                  This wallet has no recent transaction history.
+                </Text>
               </View>
             ) : (
               txns.map((item) => (
@@ -174,14 +189,23 @@ export default function App() {
                   key={item.sig}
                   style={styles.rowCard}
                   activeOpacity={0.7}
-                  onPress={() => Linking.openURL(`https://solscan.io/tx/${item.sig}`)}
+                  onPress={() =>
+                    Linking.openURL(`https://solscan.io/tx/${item.sig}`)
+                  }
                 >
                   <View style={styles.rowLeft}>
                     <Text style={styles.mintLabel}>{fmt(item.sig)}</Text>
                     <Text style={styles.mintFull}>{fmtTime(item.time)}</Text>
                   </View>
-                  <View style={[styles.statusBadge, item.ok ? styles.statusOk : styles.statusFail]}>
-                    <Text style={styles.statusText}>{item.ok ? "Success" : "Failed"}</Text>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      item.ok ? styles.statusOk : styles.statusFail,
+                    ]}
+                  >
+                    <Text style={styles.statusText}>
+                      {item.ok ? "Success" : "Failed"}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               ))
