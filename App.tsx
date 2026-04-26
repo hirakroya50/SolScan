@@ -16,6 +16,7 @@ import { TokenRow } from "./src/components/TokenRow";
 import { TransactionRow } from "./src/components/TransactionRow";
 import { getWalletOverview } from "./src/lib/solana";
 import { TokenBalance, Transaction } from "./src/types/solana";
+import { Swap } from "./src/components/Swap";
 
 const EMPTY_TOKENS_DESCRIPTION =
   "This wallet holds no SPL tokens with a balance.";
@@ -71,23 +72,7 @@ export default function App() {
   };
 
   if (screen === "swap") {
-    return (
-      <View style={styles.container}>
-        <StatusBar style="dark" />
-        <View style={styles.swapScreenContainer}>
-          <TouchableOpacity
-            onPress={() => setScreen("home")}
-            style={styles.backButton}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.backButtonText}>Back</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.swapTitle}>Swap</Text>
-          <Text style={styles.swapDescription}>This is the Swap page.</Text>
-        </View>
-      </View>
-    );
+    return <Swap setScreen={setScreen} />;
   }
 
   return (
