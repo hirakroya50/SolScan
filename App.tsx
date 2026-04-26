@@ -75,7 +75,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       {screen === "swap" ? (
-        <Swap setScreen={setScreen} />
+        <Swap onBack={() => setScreen("home")} />
       ) : (
         <View style={styles.container}>
           <StatusBar style="dark" />
@@ -304,33 +304,5 @@ const styles = StyleSheet.create({
     color: "#0f172a",
     marginTop: 8,
     marginBottom: 4,
-  },
-  swapScreenContainer: {
-    flex: 1,
-    paddingTop: 64,
-    paddingHorizontal: 20,
-    alignItems: "flex-start",
-    gap: 10,
-  },
-  backButton: {
-    backgroundColor: "#e2e8f0",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  backButtonText: {
-    color: "#0f172a",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  swapTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#0f172a",
-    marginTop: 8,
-  },
-  swapDescription: {
-    fontSize: 16,
-    color: "#475569",
   },
 });

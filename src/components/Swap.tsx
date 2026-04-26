@@ -1,19 +1,17 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SwapCard } from "./swap/SwapCard";
+import { SwapDirectionButton } from "./swap/SwapDirectionButton";
 
-export function Swap({
-  setScreen,
-}: {
-  setScreen: (screen: "home" | "swap") => void;
-}) {
+export function Swap({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <StatusBar style="light" />
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => setScreen("home")}
+          onPress={onBack}
           style={styles.backButton}
           activeOpacity={0.8}
         >
@@ -22,14 +20,44 @@ export function Swap({
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>Swap</Text>
-        <Text style={styles.description}>This is the swap page.</Text>
+        <Text style={styles.title}>Swap Tokens</Text>
+
+        <SafeAreaView
+          style={{
+            borderWidth: 1, // The thickness of the line
+            borderColor: "#fff", // The color (Black)
+            borderRadius: 8, // Optional: Rounds the corners
+            borderStyle: "solid",
+          }}
+        >
+          <SwapCard
+            symbol="ETH"
+            amount="0.28014"
+            balanceText="Balance: 0.0661 ETH"
+            usdText="$499.749"
+            iconBackground="#4f6fd8"
+          />
+
+          {/* <View
+            style={{ alignItems: "center", marginVertical: -18, zIndex: 2 }}
+          >
+            <SwapDirectionButton />
+          </View> */}
+
+          <SwapCard
+            symbol="DAI"
+            amount="500"
+            balanceText="Balance: 250 DAI"
+            usdText="$499.419"
+            iconBackground="#fbbf24"
+          />
+        </SafeAreaView>
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = {
   safeArea: {
     flex: 1,
     backgroundColor: "#000000",
@@ -65,4 +93,4 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
-});
+} as const;
