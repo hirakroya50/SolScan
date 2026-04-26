@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { EmptyState } from "./src/components/EmptyState";
 import { TokenRow } from "./src/components/TokenRow";
@@ -71,110 +72,116 @@ export default function App() {
     setError(null);
   };
 
-  if (screen === "swap") {
-    return <Swap setScreen={setScreen} />;
-  }
-
   return (
-    <View style={styles.container}>
-      <StatusBar style="dark" />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scroll}
-      >
-        {/* Header */}
-        <View style={styles.headerRow}>
-          <Text style={styles.heading}>SolScan</Text>
-          <TouchableOpacity
-            onPress={() => setScreen("swap")}
-            style={styles.swapButton}
-            activeOpacity={0.85}
+    <SafeAreaProvider>
+      {screen === "swap" ? (
+        <Swap setScreen={setScreen} />
+      ) : (
+        <View style={styles.container}>
+          <StatusBar style="dark" />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scroll}
           >
-            <Text style={styles.swapButtonText}>Swap</Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.subHeading}>
-          Track wallet balance, tokens & recent activity
-        </Text>
-
-        {/* Search */}
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Solana wallet address"
-          placeholderTextColor="#8a94a6"
-          value={address}
-          onChangeText={handleAddressChange}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        {/* Error banner */}
-        {error && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
-          </View>
-        )}
-
-        {/* Fetch button */}
-        <TouchableOpacity
-          onPress={search}
-          style={[styles.btn, loading && styles.btnDisabled]}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.btnText}>Fetch Data</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* Results — only after a successful search */}
-        {searched && (
-          <>
-            {/* Balance card */}
-            <View style={styles.card}>
-              <Text style={styles.cardLabel}>SOL Balance</Text>
-              <Text style={styles.balanceValue}>{balance?.toFixed(6)} SOL</Text>
+            {/* Header */}
+            <View style={styles.headerRow}>
+              <Text style={styles.heading}>SolScan</Text>
+              <TouchableOpacity
+                onPress={() => setScreen("swap")}
+                style={styles.swapButton}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.swapButtonText}>Swap</Text>
+              </TouchableOpacity>
             </View>
+            <Text style={styles.subHeading}>
+              Track wallet balance, tokens & recent activity
+            </Text>
 
-            {/* Token list */}
-            <Text style={styles.sectionTitle}>Tokens</Text>
-            {tokens.length === 0 ? (
-              <EmptyState
-                icon="🪙"
-                title="No tokens found"
-                description={EMPTY_TOKENS_DESCRIPTION}
-              />
-            ) : (
-              <FlatList
-                data={tokens}
-                keyExtractor={(item) => item.mint}
-                scrollEnabled={false}
-                renderItem={({ item }) => <TokenRow token={item} />}
-              />
+            {/* Search */}
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Solana wallet address"
+              placeholderTextColor="#8a94a6"
+              value={address}
+              onChangeText={handleAddressChange}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            {/* Error banner */}
+            {error && (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>⚠️ {error}</Text>
+              </View>
             )}
 
-            {/* Transactions list */}
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
-            {txns.length === 0 ? (
-              <EmptyState
-                icon="📭"
-                title="No transactions found"
-                description={EMPTY_TRANSACTIONS_DESCRIPTION}
-              />
-            ) : (
-              <FlatList
-                data={txns}
-                keyExtractor={(item) => item.sig}
-                scrollEnabled={false}
-                renderItem={({ item }) => <TransactionRow transaction={item} />}
-              />
+            {/* Fetch button */}
+            <TouchableOpacity
+              onPress={search}
+              style={[styles.btn, loading && styles.btnDisabled]}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.btnText}>Fetch Data</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Results — only after a successful search */}
+            {searched && (
+              <>
+                {/* Balance card */}
+                <View style={styles.card}>
+                  <Text style={styles.cardLabel}>SOL Balance</Text>
+                  <Text style={styles.balanceValue}>
+                    {balance?.toFixed(6)} SOL
+                  </Text>
+                </View>
+
+                {/* Token list */}
+                <Text style={styles.sectionTitle}>Tokens</Text>
+                {tokens.length === 0 ? (
+                  <EmptyState
+                    icon="🪙"
+                    title="No tokens found"
+                    description={EMPTY_TOKENS_DESCRIPTION}
+                  />
+                ) : (
+                  <FlatList
+                    data={tokens}
+                    keyExtractor={(item) => item.mint}
+                    scrollEnabled={false}
+                    renderItem={({ item }) => <TokenRow token={item} />}
+                  />
+                )}
+
+                {/* Transactions list */}
+                <Text style={styles.sectionTitle}>Recent Transactions</Text>
+                {txns.length === 0 ? (
+                  <EmptyState
+                    icon="📭"
+                    title="No transactions found"
+                    description={EMPTY_TRANSACTIONS_DESCRIPTION}
+                  />
+                ) : (
+                  <FlatList
+                    data={txns}
+                    keyExtractor={(item) => item.sig}
+                    scrollEnabled={false}
+                    renderItem={({ item }) => (
+                      <TransactionRow transaction={item} />
+                    )}
+                  />
+                )}
+              </>
             )}
-          </>
-        )}
-      </ScrollView>
-    </View>
+          </ScrollView>
+        </View>
+      )}
+    </SafeAreaProvider>
   );
 }
 

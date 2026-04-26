@@ -1,27 +1,17 @@
-import {
-  Platform,
-  SafeAreaView,
-  StatusBar as NativeStatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export function Swap({
   setScreen,
 }: {
   setScreen: (screen: "home" | "swap") => void;
 }) {
-  const androidTopInset =
-    Platform.OS === "android" ? (NativeStatusBar.currentHeight ?? 0) : 0;
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="light" translucent={false} />
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <StatusBar style="light" />
 
-      <View style={[styles.header, { paddingTop: androidTopInset + 8 }]}>
+      <View style={styles.header}>
         <TouchableOpacity
           onPress={() => setScreen("home")}
           style={styles.backButton}
@@ -46,6 +36,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
+    paddingTop: 8,
   },
   content: {
     flex: 1,
