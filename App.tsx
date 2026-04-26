@@ -8,66 +8,21 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Linking,
   FlatList,
 } from "react-native";
-const RPC = "https://api.mainnet-beta.solana.com";
 
-const rpc = async (method: string, params: any[]) => {
-  const res = await fetch(RPC, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-  });
+import { EmptyState } from "./src/components/EmptyState";
+import { TokenRow } from "./src/components/TokenRow";
+import { TransactionRow } from "./src/components/TransactionRow";
+import { getWalletOverview } from "./src/lib/solana";
+import { TokenBalance, Transaction } from "./src/types/solana";
 
-  const json = await res.json();
-  if (json.error) throw new Error(json.error.message);
-  return json.result;
-};
-
-const getBalance = async (addr: string) => {
-  const result = await rpc("getBalance", [addr]);
-  return result.value / 1_000_000_000;
-};
-
-const getTokens = async (addr: string) => {
-  const result = await rpc("getTokenAccountsByOwner", [
-    addr,
-    { programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" },
-    { encoding: "jsonParsed" },
-  ]);
-
-  return (result.value || [])
-    .map((a: any) => ({
-      mint: a.account.data.parsed.info.mint,
-      amount: a.account.data.parsed.info.tokenAmount.uiAmount,
-    }))
-    .filter((t: any) => t.amount > 0);
-};
-
-const getTxns = async (addr: string) => {
-  const sigs = await rpc("getSignaturesForAddress", [addr, { limit: 10 }]);
-  return sigs.map((s: any) => ({
-    sig: s.signature,
-    time: s.blockTime,
-    ok: !s.err,
-  }));
-};
-
-const fmt = (addr: string) => `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-const fmtTime = (ts: number | null) =>
-  ts ? new Date(ts * 1000).toLocaleDateString() : "—";
-
-type TokenBalance = {
-  mint: string;
-  amount: number;
-};
-
-type Transaction = {
-  sig: string;
-  time: number | null;
-  ok: boolean;
-};
+const EMPTY_TOKENS_DESCRIPTION =
+  "This wallet holds no SPL tokens with a balance.";
+const EMPTY_TRANSACTIONS_DESCRIPTION =
+  "This wallet has no recent transaction history.";
+const SEARCH_ERROR_FALLBACK =
+  "Something went wrong. Check the address and try again.";
 
 export default function App() {
   const [address, setAddress] = useState("");
@@ -79,31 +34,37 @@ export default function App() {
   const [searched, setSearched] = useState(false);
 
   const search = async () => {
-    const addr = address.trim();
-    if (!addr) {
+    const trimmedAddress = address.trim();
+
+    if (!trimmedAddress) {
       setError("Please enter a wallet address.");
       return;
     }
+
     setLoading(true);
     setError(null);
     setSearched(false);
+
     try {
-      const [bal, tok, tx] = await Promise.all([
-        getBalance(addr),
-        getTokens(addr),
-        getTxns(addr),
-      ]);
-      setBalance(bal);
-      setTokens(tok);
-      setTxns(tx);
+      const overview = await getWalletOverview(trimmedAddress);
+
+      setBalance(overview.balance);
+      setTokens(overview.tokens);
+      setTxns(overview.txns);
       setSearched(true);
-    } catch (e: any) {
-      setError(
-        e.message || "Something went wrong. Check the address and try again.",
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : SEARCH_ERROR_FALLBACK;
+
+      setError(message || SEARCH_ERROR_FALLBACK);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddressChange = (value: string) => {
+    setAddress(value);
+    setError(null);
   };
 
   return (
@@ -125,10 +86,7 @@ export default function App() {
           placeholder="Enter Solana wallet address"
           placeholderTextColor="#8a94a6"
           value={address}
-          onChangeText={(t) => {
-            setAddress(t);
-            setError(null);
-          }}
+          onChangeText={handleAddressChange}
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -139,7 +97,7 @@ export default function App() {
             <Text style={styles.errorText}>⚠️ {error}</Text>
           </View>
         )}
-
+        <Text>ghgghgh</Text>
         {/* Fetch button */}
         <TouchableOpacity
           onPress={search}
@@ -166,69 +124,34 @@ export default function App() {
             {/* Token list */}
             <Text style={styles.sectionTitle}>Tokens</Text>
             {tokens.length === 0 ? (
-              <View style={styles.emptyBox}>
-                <Text style={styles.emptyIcon}>🪙</Text>
-                <Text style={styles.emptyTitle}>No tokens found</Text>
-                <Text style={styles.emptyDesc}>
-                  This wallet holds no SPL tokens with a balance.
-                </Text>
-              </View>
+              <EmptyState
+                icon="🪙"
+                title="No tokens found"
+                description={EMPTY_TOKENS_DESCRIPTION}
+              />
             ) : (
               <FlatList
                 data={tokens}
                 keyExtractor={(item) => item.mint}
                 scrollEnabled={false}
-                renderItem={({ item }) => (
-                  <View style={styles.rowCard}>
-                    <View style={styles.rowLeft}>
-                      <Text style={styles.mintLabel}>{fmt(item.mint)}</Text>
-                      <Text style={styles.mintFull}>{item.mint}</Text>
-                    </View>
-                    <Text style={styles.tokenAmount}>{item.amount}</Text>
-                  </View>
-                )}
+                renderItem={({ item }) => <TokenRow token={item} />}
               />
             )}
 
             {/* Transactions list */}
             <Text style={styles.sectionTitle}>Recent Transactions</Text>
             {txns.length === 0 ? (
-              <View style={styles.emptyBox}>
-                <Text style={styles.emptyIcon}>📭</Text>
-                <Text style={styles.emptyTitle}>No transactions found</Text>
-                <Text style={styles.emptyDesc}>
-                  This wallet has no recent transaction history.
-                </Text>
-              </View>
+              <EmptyState
+                icon="📭"
+                title="No transactions found"
+                description={EMPTY_TRANSACTIONS_DESCRIPTION}
+              />
             ) : (
               <FlatList
                 data={txns}
                 keyExtractor={(item) => item.sig}
                 scrollEnabled={false}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.rowCard}
-                    activeOpacity={0.7}
-                    onPress={() =>
-                      Linking.openURL(`https://solscan.io/tx/${item.sig}`)
-                    }
-                  >
-                    <View style={styles.rowLeft}>
-                      <Text style={styles.mintLabel}>{fmt(item.sig)}</Text>
-                      <Text style={styles.mintFull}>{fmtTime(item.time)}</Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        item.ok ? styles.statusOk : styles.statusFail,
-                      ]}
-                    >
-                      <Text style={styles.statusText}>
-                        {item.ok ? "Success" : "Failed"}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
+                renderItem={({ item }) => <TransactionRow transaction={item} />}
               />
             )}
           </>
@@ -338,79 +261,5 @@ const styles = StyleSheet.create({
     color: "#0f172a",
     marginTop: 8,
     marginBottom: 4,
-  },
-  rowCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    marginBottom: 8,
-  },
-  rowLeft: {
-    flex: 1,
-    marginRight: 10,
-  },
-  mintLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0f172a",
-  },
-  mintFull: {
-    fontSize: 12,
-    color: "#94a3b8",
-    marginTop: 2,
-  },
-  tokenAmount: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1e40af",
-  },
-  statusBadge: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-  },
-  statusOk: {
-    backgroundColor: "#dcfce7",
-  },
-  statusFail: {
-    backgroundColor: "#fee2e2",
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#0f172a",
-  },
-  emptyBox: {
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderStyle: "dashed",
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  emptyIcon: {
-    fontSize: 32,
-    marginBottom: 10,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#334155",
-    marginBottom: 4,
-  },
-  emptyDesc: {
-    fontSize: 13,
-    color: "#94a3b8",
-    textAlign: "center",
-    lineHeight: 18,
   },
 });
