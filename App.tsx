@@ -9,6 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Linking,
+  FlatList,
 } from "react-native";
 const RPC = "https://api.mainnet-beta.solana.com";
 
@@ -57,11 +58,22 @@ const fmt = (addr: string) => `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 const fmtTime = (ts: number | null) =>
   ts ? new Date(ts * 1000).toLocaleDateString() : "—";
 
+type TokenBalance = {
+  mint: string;
+  amount: number;
+};
+
+type Transaction = {
+  sig: string;
+  time: number | null;
+  ok: boolean;
+};
+
 export default function App() {
   const [address, setAddress] = useState("");
   const [balance, setBalance] = useState<number | null>(null);
-  const [tokens, setTokens] = useState<any[]>([]);
-  const [txns, setTxns] = useState<any[]>([]);
+  const [tokens, setTokens] = useState<TokenBalance[]>([]);
+  const [txns, setTxns] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
@@ -162,15 +174,20 @@ export default function App() {
                 </Text>
               </View>
             ) : (
-              tokens.map((item) => (
-                <View key={item.mint} style={styles.rowCard}>
-                  <View style={styles.rowLeft}>
-                    <Text style={styles.mintLabel}>{fmt(item.mint)}</Text>
-                    <Text style={styles.mintFull}>{item.mint}</Text>
+              <FlatList
+                data={tokens}
+                keyExtractor={(item) => item.mint}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <View style={styles.rowCard}>
+                    <View style={styles.rowLeft}>
+                      <Text style={styles.mintLabel}>{fmt(item.mint)}</Text>
+                      <Text style={styles.mintFull}>{item.mint}</Text>
+                    </View>
+                    <Text style={styles.tokenAmount}>{item.amount}</Text>
                   </View>
-                  <Text style={styles.tokenAmount}>{item.amount}</Text>
-                </View>
-              ))
+                )}
+              />
             )}
 
             {/* Transactions list */}
@@ -184,31 +201,35 @@ export default function App() {
                 </Text>
               </View>
             ) : (
-              txns.map((item) => (
-                <TouchableOpacity
-                  key={item.sig}
-                  style={styles.rowCard}
-                  activeOpacity={0.7}
-                  onPress={() =>
-                    Linking.openURL(`https://solscan.io/tx/${item.sig}`)
-                  }
-                >
-                  <View style={styles.rowLeft}>
-                    <Text style={styles.mintLabel}>{fmt(item.sig)}</Text>
-                    <Text style={styles.mintFull}>{fmtTime(item.time)}</Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      item.ok ? styles.statusOk : styles.statusFail,
-                    ]}
+              <FlatList
+                data={txns}
+                keyExtractor={(item) => item.sig}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.rowCard}
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      Linking.openURL(`https://solscan.io/tx/${item.sig}`)
+                    }
                   >
-                    <Text style={styles.statusText}>
-                      {item.ok ? "Success" : "Failed"}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))
+                    <View style={styles.rowLeft}>
+                      <Text style={styles.mintLabel}>{fmt(item.sig)}</Text>
+                      <Text style={styles.mintFull}>{fmtTime(item.time)}</Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        item.ok ? styles.statusOk : styles.statusFail,
+                      ]}
+                    >
+                      <Text style={styles.statusText}>
+                        {item.ok ? "Success" : "Failed"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
             )}
           </>
         )}
