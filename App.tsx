@@ -24,7 +24,10 @@ const EMPTY_TRANSACTIONS_DESCRIPTION =
 const SEARCH_ERROR_FALLBACK =
   "Something went wrong. Check the address and try again.";
 
+type AppScreen = "home" | "swap";
+
 export default function App() {
+  const [screen, setScreen] = useState<AppScreen>("home");
   const [address, setAddress] = useState("");
   const [balance, setBalance] = useState<number | null>(null);
   const [tokens, setTokens] = useState<TokenBalance[]>([]);
@@ -67,6 +70,26 @@ export default function App() {
     setError(null);
   };
 
+  if (screen === "swap") {
+    return (
+      <View style={styles.container}>
+        <StatusBar style="dark" />
+        <View style={styles.swapScreenContainer}>
+          <TouchableOpacity
+            onPress={() => setScreen("home")}
+            style={styles.backButton}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.swapTitle}>Swap</Text>
+          <Text style={styles.swapDescription}>This is the Swap page.</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -75,7 +98,16 @@ export default function App() {
         contentContainerStyle={styles.scroll}
       >
         {/* Header */}
-        <Text style={styles.heading}>SolScan</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.heading}>SolScan</Text>
+          <TouchableOpacity
+            onPress={() => setScreen("swap")}
+            style={styles.swapButton}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.swapButtonText}>Swap</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.subHeading}>
           Track wallet balance, tokens & recent activity
         </Text>
@@ -97,7 +129,7 @@ export default function App() {
             <Text style={styles.errorText}>⚠️ {error}</Text>
           </View>
         )}
-        <Text>ghgghgh</Text>
+
         {/* Fetch button */}
         <TouchableOpacity
           onPress={search}
@@ -172,11 +204,30 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
     gap: 12,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   heading: {
     fontSize: 32,
     fontWeight: "700",
     color: "#0f172a",
     letterSpacing: 0.3,
+    flex: 1,
+  },
+  swapButton: {
+    backgroundColor: "#0f172a",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  swapButtonText: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.2,
   },
   subHeading: {
     fontSize: 15,
@@ -261,5 +312,33 @@ const styles = StyleSheet.create({
     color: "#0f172a",
     marginTop: 8,
     marginBottom: 4,
+  },
+  swapScreenContainer: {
+    flex: 1,
+    paddingTop: 64,
+    paddingHorizontal: 20,
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  backButton: {
+    backgroundColor: "#e2e8f0",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  backButtonText: {
+    color: "#0f172a",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  swapTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#0f172a",
+    marginTop: 8,
+  },
+  swapDescription: {
+    fontSize: 16,
+    color: "#475569",
   },
 });
