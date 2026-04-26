@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -5,6 +6,9 @@ import { SwapCard } from "./swap/SwapCard";
 import { SwapDirectionButton } from "./swap/SwapDirectionButton";
 
 export function Swap({ onBack }: { onBack: () => void }) {
+  const [fromAmount, setFromAmount] = useState("0.28014");
+  const [toAmount, setToAmount] = useState("500");
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <StatusBar style="light" />
@@ -22,36 +26,36 @@ export function Swap({ onBack }: { onBack: () => void }) {
       <View style={styles.content}>
         <Text style={styles.title}>Swap Tokens</Text>
 
-        <SafeAreaView
+        <View
           style={{
-            borderWidth: 1, // The thickness of the line
-            borderColor: "#fff", // The color (Black)
-            borderRadius: 8, // Optional: Rounds the corners
-            borderStyle: "solid",
+            width: "100%",
+            marginTop: 22,
           }}
         >
           <SwapCard
             symbol="ETH"
-            amount="0.28014"
+            amount={fromAmount}
+            onChangeAmount={setFromAmount}
             balanceText="Balance: 0.0661 ETH"
             usdText="$499.749"
             iconBackground="#4f6fd8"
           />
 
-          {/* <View
+          <View
             style={{ alignItems: "center", marginVertical: -18, zIndex: 2 }}
           >
             <SwapDirectionButton />
-          </View> */}
+          </View>
 
           <SwapCard
             symbol="DAI"
-            amount="500"
+            amount={toAmount}
+            onChangeAmount={setToAmount}
             balanceText="Balance: 250 DAI"
             usdText="$499.419"
             iconBackground="#fbbf24"
           />
-        </SafeAreaView>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -68,14 +72,16 @@ const styles = {
   },
   content: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-start",
+    alignItems: "stretch",
     paddingHorizontal: 20,
+    paddingTop: 20,
   },
   title: {
     color: "#ffffff",
     fontSize: 28,
     fontWeight: "700",
+    alignSelf: "flex-start",
   },
   description: {
     color: "#cbd5e1",
