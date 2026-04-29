@@ -75,11 +75,6 @@ export function SwapCard({
             v
           </Text>
         </View>
-        <TextInput
-          style={{
-            backgroundColor: "#ffffff",
-          }}
-        />
 
         <TextInput
           value={amount}
@@ -91,7 +86,6 @@ export function SwapCard({
           placeholderTextColor="#64748b"
           style={{
             color: "#1b63ac",
-            backgroundColor: "#ffffff",
             fontSize: 58,
             fontWeight: "500",
             flexShrink: 1,
